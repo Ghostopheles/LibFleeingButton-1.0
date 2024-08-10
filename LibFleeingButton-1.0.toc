@@ -1,0 +1,14 @@
+## Interface: 110000
+## Title: Lib: LibFleeingButton
+## Notes: A cadaverous tool for creating buttons that flee from the cursor.
+## Author: Ghostopheles
+## Version: @project-version@
+## IconAtlas: minortalents-icon-book
+
+## OptionalDeps: LibStub
+
+## X-License: Public Domain
+## X-Category: Library
+
+LibStub/LibStub.lua
+LibFleeingButton-1.0.lua
