@@ -114,6 +114,10 @@ function LibFleeingButton.MakeButtonFlee(button)
     end
 end
 
+function LibFleeingButton.MakeFrameFlee(frame)
+    LibFleeingButton.MakeButtonFlee(frame);
+end
+
 function LibFleeingButton.PauseButtonFleeing(button)
     if FLEEING_BUTTONS[button] then
         FLEEING_BUTTONS[button].Disabled = true;
