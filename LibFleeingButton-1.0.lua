@@ -13,8 +13,8 @@ end
 local NUM_CURSOR_SAMPLES = 5;
 local FLEEING_BUTTONS = {};
 
-local function ShouldMoveButton(button)
-    if InCombatLockdown() then
+local function ShouldMoveButton(button, noDisableCheck)
+    if InCombatLockdown() and (button:IsProtected() or button:IsForbidden()) then
         return false;
     end
 
@@ -26,7 +26,7 @@ local function ShouldMoveButton(button)
         return false;
     end
 
-    if FLEEING_BUTTONS[button].Disabled then
+    if not noDisableCheck and FLEEING_BUTTONS[button].Disabled then
         return false;
     end
 
@@ -100,6 +100,8 @@ end
 
 ---@param button Button | Frame
 function LibFleeingButton.MakeButtonFlee(button)
+    assert(not button:IsForbidden(), "LibFleeingButton cannot make forbidden objects flee. You need to behave.")
+
     if not FLEEING_BUTTONS[button] then
         button:HookScript("OnUpdate", HandleOnUpdate);
         button:SetClampedToScreen(true);
@@ -129,7 +131,7 @@ end
 -- Calling this in combat will silently fail
 ---@param button Button | Frame
 function LibFleeingButton.ResetButton(button)
-    if InCombatLockdown() or not FLEEING_BUTTONS[button] then
+    if ShouldMoveButton(button, true) then
         return;
     end
 

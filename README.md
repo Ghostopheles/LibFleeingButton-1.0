@@ -29,4 +29,4 @@ LibFleeingButton.ResumeButtonFleeing(button);
 ```
 
 > [!CAUTION]
-> Buttons won't flee from the cursor in combat, nor will you be able to reset buttons in combat. Maybe I'll tighten this restriction a bit and only apply it to restricted frames but I'm lazy.
+> Buttons that execute secure actions will not flee in combat nor will you be able to reset them in combat.
