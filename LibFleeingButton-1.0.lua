@@ -13,7 +13,7 @@ end
 local NUM_CURSOR_SAMPLES = 5;
 local FLEEING_BUTTONS = {};
 
-local function ShouldMoveButton(button, noDisableCheck)
+local function ShouldMoveButton(button)
     if InCombatLockdown() and (button:IsProtected() or button:IsForbidden()) then
         return false;
     end
@@ -26,7 +26,19 @@ local function ShouldMoveButton(button, noDisableCheck)
         return false;
     end
 
-    if not noDisableCheck and FLEEING_BUTTONS[button].Disabled then
+    if FLEEING_BUTTONS[button].Disabled then
+        return false;
+    end
+
+    return true;
+end
+
+local function ShouldResetButton(button)
+    if InCombatLockdown() and button:IsProtected() then
+        return false;
+    end
+
+    if not FLEEING_BUTTONS[button] then
         return false;
     end
 
@@ -131,7 +143,7 @@ end
 -- Calling this in combat will silently fail
 ---@param button Button | Frame
 function LibFleeingButton.ResetButton(button)
-    if ShouldMoveButton(button, true) then
+    if not ShouldResetButton(button) then
         return;
     end
 
