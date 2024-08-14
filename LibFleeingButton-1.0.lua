@@ -1,7 +1,7 @@
 assert(LibStub, "LibStub not found.");
 
 ---@alias LibFleeingButton-1.0 LibFleeingButton
-local major, minor = "LibFleeingButton-1.0", 1;
+local major, minor = "LibFleeingButton-1.0", 2;
 
 ---@class LibFleeingButton
 local LibFleeingButton = LibStub:NewLibrary(major, minor);
@@ -13,26 +13,12 @@ end
 local NUM_CURSOR_SAMPLES = 5;
 local FLEEING_BUTTONS = {};
 
--- stolen from TRP3
-local function Debounce(timeout, callback)
-	local calls = 0;
-
-	local function Decrement()
-		calls = calls - 1;
-
-		if calls == 0 then
-			callback();
-		end
-	end
-
-	return function()
-		C_Timer.After(timeout, Decrement);
-		calls = calls + 1;
-	end
-end
-
 local function ShouldMoveButton(button)
     if InCombatLockdown() then
+        return false;
+    end
+
+    if not button:IsShown() then
         return false;
     end
 
@@ -45,6 +31,16 @@ local function ShouldMoveButton(button)
     end
 
     return true;
+end
+
+local function GetPointsForObject(obj)
+    local points = {};
+    for i=1, obj:GetNumPoints() do
+        local anchor = AnchorUtil.CreateAnchor(obj:GetPoint(i));
+        tinsert(points, anchor);
+    end
+
+    return points;
 end
 
 local function HandleOnUpdate(button, deltaTime)
@@ -102,6 +98,7 @@ end
 
 ------------
 
+---@param button Button | Frame
 function LibFleeingButton.MakeButtonFlee(button)
     if not FLEEING_BUTTONS[button] then
         button:HookScript("OnUpdate", HandleOnUpdate);
@@ -109,28 +106,40 @@ function LibFleeingButton.MakeButtonFlee(button)
 
         FLEEING_BUTTONS[button] = {
             CursorSamples = CreateCircularBuffer(NUM_CURSOR_SAMPLES),
+            Anchors = GetPointsForObject(button),
             Disabled = false,
         };
     end
 end
 
-function LibFleeingButton.MakeFrameFlee(frame)
-    LibFleeingButton.MakeButtonFlee(frame);
-end
-
+---@param button Button | Frame
 function LibFleeingButton.PauseButtonFleeing(button)
     if FLEEING_BUTTONS[button] then
         FLEEING_BUTTONS[button].Disabled = true;
     end
 end
 
+---@param button Button | Frame
 function LibFleeingButton.ResumeButtonFleeing(button)
     if FLEEING_BUTTONS[button] then
         FLEEING_BUTTONS[button].Disabled = false;
     end
 end
 
+-- Calling this in combat will silently fail
+---@param button Button | Frame
 function LibFleeingButton.ResetButton(button)
-    FLEEING_BUTTONS[button] = nil;
+    if InCombatLockdown() or not FLEEING_BUTTONS[button] then
+        return;
+    end
+
     button:ClearPointsOffset();
+    button:ClearAllPoints();
+
+    local anchors = FLEEING_BUTTONS[button].Anchors;
+    for _, anchor in ipairs(anchors) do
+        anchor:SetPoint(button);
+    end
+
+    FLEEING_BUTTONS[button] = nil;
 end
